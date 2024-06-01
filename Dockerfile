@@ -9,4 +9,3 @@ RUN docker-php-ext-install curl soap
 COPY ../src /var/www/html
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
-CMD ["php-fpm"]
