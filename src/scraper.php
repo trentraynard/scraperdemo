@@ -46,3 +46,43 @@ function get_html($url) {
     
 }
 
+function scrapeSite($url) {
+//check for parameter
+
+// Call curl
+$url = get_html($url);
+//set up dom
+$dom = new DOMDocument();
+//supress warnings 
+@$dom->loadHTML($url);
+
+$headlines = [];
+
+$headline3Nodes = $dom->getElementsByTagName('h3');
+foreach ($headline3Nodes as $headline3Node) {
+  $headline_text = $headline3Node->textContent;
+  $headlines[] = trim(html_entity_decode($headline_text, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+}
+
+$headline4Nodes = $dom->getElementsByTagName('h4');
+foreach ($headline4Nodes as $headline4Node) {
+    $headline_text = $headline4Node->textContent;
+    $headlines[] = trim(html_entity_decode($headline_text, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+}
+
+$summaries = [];
+
+$paragraphNodes = $dom->getElementsByTagName('p');
+foreach ($paragraphNodes as $paragraphNode) {
+    $summaries[] = trim($paragraphNode->textContent);
+}
+
+$summaryNodes = $dom->getElementsByTagName('div');
+foreach ($summaryNodes as $summaryNode) {
+    if ($summaryNode->getAttribute('class') === 'excerpt') {
+        $summaries[] = trim($summaryNode->textContent);
+    }
+}
+
+return $articles = ['headlines' => $headlines, 'summaries' => $summaries];
+}
