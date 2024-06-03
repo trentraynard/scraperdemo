@@ -53,9 +53,9 @@ function scrapeSite($url) {
     }
     // Call curl
     $url = fetchHtml($url);
-    //set up dom
+    // set up dom
     $dom = new DOMDocument();
-    //supress warnings 
+    // supress warnings 
     @$dom->loadHTML($url);
 
     $articles = [];
@@ -65,7 +65,7 @@ function scrapeSite($url) {
         $summaryTag = $articleTag->getElementsByTagName('p')->item(0);
 
         $summary = $summaryTag ? trim($summaryTag->textContent) : null;
-        //check for summary in div if not in p (OC reg)
+        // check for summary in div if not in p (OC reg)
         if (!$summary) {
             $divTags = $articleTag->getElementsByTagName('div');
             foreach ($divTags as $divTag) {
@@ -74,8 +74,13 @@ function scrapeSite($url) {
                 }
             }
         }
-
+        // check for subscriber only header
         $headline = $headTag ? trim($headTag->textContent) : 'No headline available';
+        if ($headline === 'SUBSCRIBER ONLY') {
+            $nextTag = $articleTag->getElementsByTagName('h3')->item(1);
+            $headline = trim($nextTag->textContent);
+        }
+
         $summary = $summary ? $summary : 'No summary available';
         $articles[] = ['headline' => $headline, 'summary' => $summary];
     }
