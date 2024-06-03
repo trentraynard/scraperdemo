@@ -56,33 +56,27 @@ $dom = new DOMDocument();
 //supress warnings 
 @$dom->loadHTML($url);
 
-$headlines = [];
+$articles = [];
+$articleTags = $dom->getElementsByTagName('article');
+foreach ($articleTags as $articleTag) {
+    $headTag = $articleTag->getElementsByTagName('h3')->item(0);
+    $summaryTag = $articleTag->getElementsByTagName('p')->item(0);
 
-$headline3Nodes = $dom->getElementsByTagName('h3');
-foreach ($headline3Nodes as $headline3Node) {
-  $headline_text = $headline3Node->textContent;
-  $headlines[] = trim(html_entity_decode($headline_text, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-}
-
-$headline4Nodes = $dom->getElementsByTagName('h4');
-foreach ($headline4Nodes as $headline4Node) {
-    $headline_text = $headline4Node->textContent;
-    $headlines[] = trim(html_entity_decode($headline_text, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-}
-
-$summaries = [];
-
-$paragraphNodes = $dom->getElementsByTagName('p');
-foreach ($paragraphNodes as $paragraphNode) {
-    $summaries[] = trim($paragraphNode->textContent);
-}
-
-$summaryNodes = $dom->getElementsByTagName('div');
-foreach ($summaryNodes as $summaryNode) {
-    if ($summaryNode->getAttribute('class') === 'excerpt') {
-        $summaries[] = trim($summaryNode->textContent);
+    $summary = $summaryTag ? trim($summaryTag->textContent) : null;
+    //check for summary in div if not in p (OC reg)
+    if (!$summary) {
+        $divTags = $articleTag->getElementsByTagName('div');
+        foreach ($divTags as $divTag) {
+            if ($divTag->getAttribute('class') === 'excerpt') {
+                $summary = trim($divTag->textContent);
+            }
+        }
     }
+
+    $headline = $headTag ? trim($headTag->textContent) : 'No headline available';
+    $summary = $summary ? $summary : 'No summary available';
+    $articles[] = ['headline' => $headline, 'summary' => $summary];
 }
 
-return $articles = ['headlines' => $headlines, 'summaries' => $summaries];
+return $articles;
 }
