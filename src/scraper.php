@@ -1,6 +1,6 @@
 <?php
 
-function getHtml($url) {
+function fetchHtml($url) {
     // Set up curl 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -52,7 +52,7 @@ function scrapeSite($url) {
         return ['error' => 'Invalid URL'];
     }
     // Call curl
-    $url = getHtml($url);
+    $url = fetchHtml($url);
     //set up dom
     $dom = new DOMDocument();
     //supress warnings 

@@ -1,0 +1,19 @@
+#result {
+    max-width: 100%; /* Set a maximum width for the table */
+    margin: 0 auto; /* Center the table horizontally */
+}
+
+.card {
+    display: inline-block;
+    width: calc(50% - 10px); /* Set the width of each news item, subtracting margin */
+    margin: 5px; /* Add some spacing between news items */
+    vertical-align: top; /* Align news items to the top */
+}
+
+.card-title {
+    font-size: 18px; /* Decrease the font size of the headline */
+}
+
+.card-text {
+    font-size: 14px; /* Decrease the font size of the summary */
+}
