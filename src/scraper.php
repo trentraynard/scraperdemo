@@ -1,11 +1,11 @@
 <?php
-//curl to get html
-function get_html($url) {
+
+function getHtml($url) {
     // Set up curl 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-    $user_agents = [
+    $userAgents = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0",
@@ -18,8 +18,8 @@ function get_html($url) {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0"
     ];
     // Get random user agent
-    $user_agent = $user_agents[rand(0,count($user_agents)-1)];
-    curl_setopt($curl, CURLOPT_USERAGENT, $user_agent);
+    $userAgent = $userAgents[rand(0,count($userAgents)-1)];
+    curl_setopt($curl, CURLOPT_USERAGENT, $userAgent);
     // Set up Referer
     curl_setopt($curl, CURLOPT_REFERER, 'https://www.google.com');
     // Set up mimic headers
@@ -39,7 +39,7 @@ function get_html($url) {
     curl_close($curl);
     // Log response and return result
     if ($err) {
-        echo 'cURL error: ' . $err;
+        return ['error' => 'cURL error: ' . $err];
     } else {
         return $response;
     }
@@ -47,36 +47,45 @@ function get_html($url) {
 }
 
 function scrapeSite($url) {
-//check for parameter
+    //check for parameter
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        return ['error' => 'Invalid URL'];
+    }
+    // Call curl
+    $url = getHtml($url);
+    //set up dom
+    $dom = new DOMDocument();
+    //supress warnings 
+    @$dom->loadHTML($url);
 
-// Call curl
-$url = get_html($url);
-//set up dom
-$dom = new DOMDocument();
-//supress warnings 
-@$dom->loadHTML($url);
+    $articles = [];
+    $articleTags = $dom->getElementsByTagName('article');
+    foreach ($articleTags as $articleTag) {
+        $headTag = $articleTag->getElementsByTagName('h3')->item(0);
+        $summaryTag = $articleTag->getElementsByTagName('p')->item(0);
 
-$articles = [];
-$articleTags = $dom->getElementsByTagName('article');
-foreach ($articleTags as $articleTag) {
-    $headTag = $articleTag->getElementsByTagName('h3')->item(0);
-    $summaryTag = $articleTag->getElementsByTagName('p')->item(0);
-
-    $summary = $summaryTag ? trim($summaryTag->textContent) : null;
-    //check for summary in div if not in p (OC reg)
-    if (!$summary) {
-        $divTags = $articleTag->getElementsByTagName('div');
-        foreach ($divTags as $divTag) {
-            if ($divTag->getAttribute('class') === 'excerpt') {
-                $summary = trim($divTag->textContent);
+        $summary = $summaryTag ? trim($summaryTag->textContent) : null;
+        //check for summary in div if not in p (OC reg)
+        if (!$summary) {
+            $divTags = $articleTag->getElementsByTagName('div');
+            foreach ($divTags as $divTag) {
+                if ($divTag->getAttribute('class') === 'excerpt') {
+                    $summary = trim($divTag->textContent);
+                }
             }
         }
-    }
 
-    $headline = $headTag ? trim($headTag->textContent) : 'No headline available';
-    $summary = $summary ? $summary : 'No summary available';
-    $articles[] = ['headline' => $headline, 'summary' => $summary];
+        $headline = $headTag ? trim($headTag->textContent) : 'No headline available';
+        $summary = $summary ? $summary : 'No summary available';
+        $articles[] = ['headline' => $headline, 'summary' => $summary];
+    }
+    
+    return $articles;
 }
 
-return $articles;
+// Handle request
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['url'])) {
+    $url = $_GET['url'];
+    header('Content-Type: application/json');
+    echo json_encode(scrapeSite($url));
 }
