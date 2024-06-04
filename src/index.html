@@ -10,12 +10,11 @@
     <body>
         <div class="container text-center mt-5">
             <h3>Scraper Demo</h3>
-            <button class="btn btn-primary mt-3">to be added</button>
-            <button class="btn btn-primary mt-3" onclick="fetchScrapeData('https://www.ocregister.com/')">Fetch OC Register News</button>
+            <button class="btn btn-primary mt-3" onclick="fetchScrapeData('https://www.news.com.au/')">Fetch News.com AU</button>
+            <button class="btn btn-primary mt-3" onclick="fetchScrapeData('https://www.ocregister.com/')">Fetch OC Register</button>
             <canvas id="newsChart" width="400" height="200" class="mt-4"></canvas>
             <canvas id="keywordChart" width="400" height="200" class="mt-4"></canvas>
-            <div id="result" class="mt-3"></div> 
-            
+            <div id="result" class="mt-4"></div> 
 
         </div>
         <script src="scrape.js"></script>

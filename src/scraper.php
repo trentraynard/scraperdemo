@@ -75,12 +75,18 @@ function scrapeSite($url) {
             }
         }
         // check for subscriber only header
-        $headline = $headTag ? trim($headTag->textContent) : 'No headline available';
+        $headline = $headTag ? trim($headTag->textContent) : null;
+        // check for headline in h4 (news AU) 
+        if (!$headline ) {
+            $head4Tag = $articleTag->getElementsByTagName('h4')->item(0);
+            $headline = trim($head4Tag->textContent);
+        }
         if ($headline === 'SUBSCRIBER ONLY') {
             $nextTag = $articleTag->getElementsByTagName('h3')->item(1);
             $headline = trim($nextTag->textContent);
         }
-
+   
+        $headline = $headline ? $headline : 'No headline available';
         $summary = $summary ? $summary : 'No summary available';
         $articles[] = ['headline' => $headline, 'summary' => $summary];
     }
