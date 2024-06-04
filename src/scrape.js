@@ -26,6 +26,10 @@ function fetchScrapeData(url) {
             // Loop through the results to create a table
             data.forEach(function(newsItem) {
                 if (newsItem.headline !== 'No headline available') {
+                    // Check encoding
+                    let headline = fixEncoding(newsItem.headline);
+                    let summary = fixEncoding(newsItem.summary);
+
                     // Create html elements to show headlines and summarries
                     let newsDiv = document.createElement('div');
                     newsDiv.classList.add('card', 'mb-3');
@@ -33,23 +37,23 @@ function fetchScrapeData(url) {
                     let cardBody = document.createElement('div');
                     cardBody.classList.add('card-body');
 
-                    let headline = document.createElement('h5');
-                    headline.classList.add('card-title');
-                    headline.textContent = newsItem.headline;
+                    let headlineElem = document.createElement('h5');
+                    headlineElem.classList.add('card-title');
+                    headlineElem.textContent = headline;
 
-                    let summary = document.createElement('p');
-                    summary.classList.add('card-text');
-                    summary.textContent = newsItem.summary;
+                    let summaryElem = document.createElement('p');
+                    summaryElem.classList.add('card-text');
+                    summaryElem.textContent = summary;
 
-                    cardBody.appendChild(headline);
-                    cardBody.appendChild(summary);
+                    cardBody.appendChild(headlineElem);
+                    cardBody.appendChild(summaryElem);
 
                     newsDiv.appendChild(cardBody);
 
                     document.getElementById('result').appendChild(newsDiv);
 
-                    titles.push(newsItem.headline);
-                    combinedText += `${newsItem.headline} ${newsItem.summary}`;
+                    titles.push(headline);
+                    combinedText += `${headline} ${summary}`;
                 }
             });
             let kewordCounts = getKeywordCounts(combinedText);
@@ -142,4 +146,19 @@ function createTitleChart(titles) {
             }
         }
     });
+}
+
+function fixEncoding(str) {
+    // Regex to detect incorrect characters
+    const incorrectCharRegex = /â|â|â¦/g;
+    if (incorrectCharRegex.test(str)) {
+        try {
+            return decodeURIComponent(escape(str));
+        } catch (e) {
+            console.error('Error decoding string:', str, e);
+            // Fallback to the original string if decoding fails
+            return str; 
+        }
+    }
+    return str;
 }

@@ -1,5 +1,5 @@
 <?php
-
+header('Content-Type: application/json; charset=utf-8');
 function fetchHtml($url) {
     // Set up curl 
     $curl = curl_init($url);
@@ -107,7 +107,7 @@ function scrapeSite($url) {
 if (!empty($_SERVER['REQUEST_METHOD'])) {
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['url'])) {
         $url = $_GET['url'];
-        header('Content-Type: application/json');
-        echo json_encode(scrapeSite($url));
+        //header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(scrapeSite($url),  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }
