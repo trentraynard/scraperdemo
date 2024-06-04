@@ -8,6 +8,19 @@ function fetchScrapeData(url) {
             // Clear previous news data if it exists
             let resultTable = document.getElementById('result');
             resultTable.innerHTML = '';
+            if (data.length === 0) {
+                // Handle empty data case
+                // Kill charts if they exist
+                if (window.keywordChart instanceof Chart) {
+                    window.keywordChart.destroy();
+                }
+                if (window.newsChart instanceof Chart) {
+                    window.newsChart.destroy();
+                }
+                // Log message to user
+                resultTable.innerHTML = 'No data available';
+                return;
+            }
             let titles = [];
             let combinedText = '';
             // Loop through the results to create a table
@@ -68,10 +81,15 @@ function getKeywordCounts(text) {
 
 function createKeywordChart(keywordCounts) {
     let ctx = document.getElementById('keywordChart').getContext('2d');
+
+    // Destroy existing chart
+    if (window.keywordChart instanceof Chart) {
+        window.keywordChart.destroy();
+    }
     let labels = keywordCounts.map(item => item[0]);
     let counts = keywordCounts.map(item => item[1]);
 
-    new Chart(ctx, {
+    window.keywordChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -97,9 +115,14 @@ function createKeywordChart(keywordCounts) {
 
 function createTitleChart(titles) {
     let ctx = document.getElementById('newsChart').getContext('2d');
+    
+    // Destroy existing chart
+    if (window.newsChart instanceof Chart) {
+        window.newsChart.destroy();
+    }
     let titleLengths = titles.map(title => title.split(' ').length);
 
-    new Chart(ctx, {
+    window.newsChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: titles.slice(0, 10), // Display only first 10 titles
