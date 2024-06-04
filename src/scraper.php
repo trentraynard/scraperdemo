@@ -68,9 +68,11 @@ function scrapeSite($url) {
         // check for summary in div if not in p (OC reg)
         if (!$summary) {
             $divTags = $articleTag->getElementsByTagName('div');
-            foreach ($divTags as $divTag) {
-                if ($divTag->getAttribute('class') === 'excerpt') {
-                    $summary = trim($divTag->textContent);
+            if ($divTags !== null) {
+                foreach ($divTags as $divTag) {
+                    if ($divTag->getAttribute('class') === 'excerpt') {
+                        $summary = trim($divTag->textContent);
+                    }
                 }
             }
         }
@@ -79,11 +81,17 @@ function scrapeSite($url) {
         // check for headline in h4 (news AU) 
         if (!$headline ) {
             $head4Tag = $articleTag->getElementsByTagName('h4')->item(0);
-            $headline = trim($head4Tag->textContent);
+            if ($head4Tag !== null) {
+                $headline = trim($head4Tag->textContent);
+            }
         }
         if ($headline === 'SUBSCRIBER ONLY') {
             $nextTag = $articleTag->getElementsByTagName('h3')->item(1);
-            $headline = trim($nextTag->textContent);
+            if ($nextTag !== null) {
+                $headline = trim($nextTag->textContent);
+            } else {
+                $headline = null;
+            }
         }
    
         $headline = $headline ? $headline : 'No headline available';
@@ -95,8 +103,11 @@ function scrapeSite($url) {
 }
 
 // Handle request
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['url'])) {
-    $url = $_GET['url'];
-    header('Content-Type: application/json');
-    echo json_encode(scrapeSite($url));
+
+if (!empty($_SERVER['REQUEST_METHOD'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['url'])) {
+        $url = $_GET['url'];
+        header('Content-Type: application/json');
+        echo json_encode(scrapeSite($url));
+    }
 }
