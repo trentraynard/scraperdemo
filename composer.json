@@ -1,0 +1,6 @@
+{
+    "name": "esco/scraperdemo",
+    "require": {
+        "phpunit/phpunit": "*"
+    }
+}
